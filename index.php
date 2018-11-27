@@ -86,23 +86,44 @@ if (!empty($_POST['newlogin'])) {
 
 <div class="jumbotron">
     <div class="container">
-        <h1>Привет username*</h1>
+        <div class="col-md-6">
+        <h1>Привет <em>username*</em></h1>
         <p>Добро пожаловать на сервис вопросов и ответов</p>
         <p>Здесь вы можете задать любой интересующий вас вопрос</p>
-        <div class="form-wrap">
-        <form method="POST" role="form">
-            <div class="form-group">
-                <input type="text" placeholder="Задайте вопрос" name="question" class="form-control">
-            </div>
-            <button type="submit" class="btn btn-success">Cпросить</button>
-        </form>
-        </div>
-        <div class="form-wrap">
             <br>
             <p>Или посмотрите ответы по категориям</p>
             <a href="#question" class="btn btn-primary btn-sm" role="button">Перейти &raquo;</a>
         </div>
+        <div class="form-wrap col-md-6 alert-success">
+        <h1>Задайте вопрос</h1>
+
+        <form method="POST" role="form">
+            <div class="form-group">
+                <br>
+                <div class="input-group">
+                    <span class="input-group-addon">Ваше имя: </span>
+                    <input type="text" name="name" class="form-control">
+                </div>
+                <br>
+                <div class="input-group">
+                    <span class="input-group-addon">Ваш email: </span>
+                    <input type="text" name="email" class="form-control">
+                </div>
+                <br>
+                <div class="input-group">
+                    <span class="input-group-addon">Ваш вопрос: </span>
+                    <input type="text" name="question" class="form-control">
+                </div>
+
+            </div>
+            <button type="submit" class="btn btn-success">Cпросить</button>
+
+        </form>
+            <br>
+        </div>
+
     </div>
+
 </div>
 
 <div class="container">
