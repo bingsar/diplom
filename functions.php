@@ -127,26 +127,27 @@ function changePass($new_pass, $id)
 
 }
 
-function newAdmin($login, $pass, $email)
+function newAdmin($user_login, $pass, $email)
 {
 
     global $pdo;
-    $checkExistedLogin = 'SELECT user_name FROM users WHERE user_name = ?';
+    $checkExistedLogin = 'SELECT user_name, user_pass FROM users WHERE user_name = ?';
     $stmt = $pdo->prepare($checkExistedLogin);
-    $stmt->execute(["$login"]);
+    $stmt->execute(["$user_login"]);
     $logins = $stmt->fetchAll();
     foreach ($logins as $login) {
-        if (isset($login)) {
+        if (isset($login['user_name']) && isset($login['user_pass'])) {
             return false;
         }
     }
-    if (empty($logins)) {
-        $newAdmin = 'INSERT INTO users (user_name, user_pass, user_email) VALUES (:login, :pass, :email)';
-        $stmt = $pdo->prepare($newAdmin);
-        $stmt->execute(["login" => $login, "pass" => $pass, "email" => $email]);
-        return true;
+    foreach ($logins as $login) {
+        if (!isset($login['user_pass'])) {
+            $newAdmin = 'INSERT INTO users (user_name, user_pass, user_email) VALUES (:login, :pass, :email)';
+            $stmt = $pdo->prepare($newAdmin);
+            $stmt->execute(["login" => $user_login, "pass" => $pass, "email" => $email]);
+            return true;
+        }
     }
-
 }
 
 function getCategories()
