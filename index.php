@@ -111,8 +111,6 @@ if (isset($_POST['name'])) {
             <button type="submit" class="btn btn-success">Cпросить</button>
 
         </form>
-            <?php var_dump($_POST);
-            var_dump($_SESSION); ?>
             <br>
         </div>
 
