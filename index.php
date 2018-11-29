@@ -3,21 +3,16 @@ require_once 'functions.php';
 $errors = [];
 if (!empty($_POST['login']) && !empty($_POST['password'])) {
     if (authorization($_POST['login'], $_POST['password'])) {
-        header('Location: todo.php');
+        header('Location: panel.php');
         die;
     } else {
         $errors[] = 'Неверный логин или пароль';
     }
 }
-if (!empty($_POST['newlogin'])) {
-    if (checkExistedLogin($_POST['newlogin'])){
-        header('Location: todo.php');
-        die;
-    } else {
-        $errorsLogin[] = 'Такой логин уже существует';
-    }
-}
 
+if (isset($_POST['name'])) {
+    addUserNameAndQuestion($_POST['name']);
+}
 ?>
 
 
@@ -31,19 +26,7 @@ if (!empty($_POST['newlogin'])) {
     <meta name="author" content="">
 
     <title>PHP - Diplom</title>
-
-    <!-- Latest compiled and minified CSS -->
     <link rel="stylesheet" href="css/bootstrap.css">
-
-    <!-- Optional theme -->
-    <link rel="stylesheet" href="css/bootstrap-theme.css">
-
-    <!-- Latest compiled and minified JavaScript -->
-    <script src="js/bootstrap.js"></script>
-
-
-
-
 </head>
 <body>
 
@@ -73,7 +56,7 @@ if (!empty($_POST['newlogin'])) {
                 </div>
                 <button type="submit" class="btn btn-success">Войти</button>
             </form>
-            <div style="color: white;">
+            <div>
             <ul>
             <?php foreach ($errors as $error): ?>
                 <li ><?= $error ?></li>
@@ -87,11 +70,11 @@ if (!empty($_POST['newlogin'])) {
 <div class="jumbotron">
     <div class="container">
         <div class="col-md-6">
-        <h1>Привет <em>username*</em></h1>
+        <h1>Привет <em><?php if (isset($_SESSION['user_name'])) { echo $_SESSION['user_name']; } else { echo 'username*'; } ?></em></h1>
         <p>Добро пожаловать на сервис вопросов и ответов</p>
         <p>Здесь вы можете задать любой интересующий вас вопрос</p>
             <br>
-            <p>Или посмотрите ответы по категориям</p>
+            <p><strong>ИЛИ</strong> посмотрите ответы по категориям</p>
             <a href="#question" class="btn btn-primary btn-sm" role="button">Перейти &raquo;</a>
         </div>
         <div class="form-wrap col-md-6 alert-success">
@@ -102,23 +85,34 @@ if (!empty($_POST['newlogin'])) {
                 <br>
                 <div class="input-group">
                     <span class="input-group-addon">Ваше имя: </span>
-                    <input type="text" name="name" class="form-control">
+                    <input type="text" name="name" class="form-control" required>
                 </div>
                 <br>
                 <div class="input-group">
                     <span class="input-group-addon">Ваш email: </span>
-                    <input type="text" name="email" class="form-control">
+                    <input type="text" name="email" class="form-control" required>
                 </div>
                 <br>
                 <div class="input-group">
                     <span class="input-group-addon">Ваш вопрос: </span>
-                    <input type="text" name="question" class="form-control">
+                    <input type="text" name="question" class="form-control" required>
+                </div>
+                <br>
+
+                <div class="input-group">
+                    <span>Выберите категорию: </span><select class="form-control" id="inputGroupSelect04" name="category">
+                        <?php foreach (getCategories() as $category) { ?>
+                            <option value="<?= $category['category'] ?>"><?= $category['category'] ?></option>
+                        <?php } ?>
+                        </select>
                 </div>
 
             </div>
             <button type="submit" class="btn btn-success">Cпросить</button>
 
         </form>
+            <?php var_dump($_POST);
+            var_dump($_SESSION); ?>
             <br>
         </div>
 
@@ -131,16 +125,9 @@ if (!empty($_POST['newlogin'])) {
     <div class="row">
         <div class="col-md-2 sidebar">
             <ul class="nav nav-sidebar">
-                <li class="active"><a href="#">PHP</a></li>
-                <li><a href="#">Python</a></li>
-                <li><a href="#">Angular</a></li>
-                <li><a href="#">JavaScript</a></li>
-            </ul>
-            <ul class="nav nav-sidebar">
-                <li><a href="">C++</a></li>
-                <li><a href="">C#</a></li>
-                <li><a href="">Ruby</a></li>
-                <li><a href="">Swift</a></li>
+                <?php foreach (getCategories() as $category) { ?>
+                <li><a href=""><?= $category['category'] ?></a></li>
+                <?php } ?>
             </ul>
         </div>
         <div class="col-md-10 main">
@@ -212,13 +199,9 @@ if (!empty($_POST['newlogin'])) {
 
 </div>
 
-
-
-<!-- Bootstrap core JavaScript
-================================================== -->
-<!-- Placed at the end of the document so the pages load faster -->
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
-<script src="../../dist/js/bootstrap.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
+<script src="js/bootstrap.min.js"></script>
 
 </body>
 </html>

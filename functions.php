@@ -2,64 +2,67 @@
 
 session_start();
 
-$db = 'todo';
+$db = 'diplom';
 $user = 'root';
 $pass = '';
 $host = 'localhost';
 $pdo = new PDO("mysql:host=$host;dbname=$db;charset=utf8", $user, $pass);
 
-$thetime = date('Y-m-d H:i:s' , time());
+$thetime = date('Y-m-d H:i:s', time());
 
 function authorization($login, $password)
 {
-   global $pdo;
-    $authorization = 'SELECT * FROM user WHERE login = :login AND password = :password';
+    global $pdo;
+    $authorization = 'SELECT * FROM users WHERE user_name = :login AND user_pass = :password';
     $stmt = $pdo->prepare($authorization);
     $stmt->execute(["login" => "$login", "password" => "$password"]);
     $users = $stmt->fetchAll();
     foreach ($users as $user) {
         if (isset($user)) {
             $_SESSION['user_id'] = $user['id'];
-            $_SESSION['user_login'] = $user['login'];
+            $_SESSION['user_name'] = $user['user_name'];
             return true;
         } else {
             return false;
         }
-
     }
 }
 
-function checkExistedLogin($login)
+function addUserNameAndQuestion($login)
 {
     global $pdo;
-    $checkExistedLogin = 'SELECT id FROM user WHERE login= ?';
+    $checkExistedLogin = 'SELECT id FROM users WHERE user_name = ?';
     $stmt = $pdo->prepare($checkExistedLogin);
     $stmt->execute(["$login"]);
-    $logins = $stmt->fetchAll();
-    foreach ($logins as $login) {
-        if (isset($login)) {
-            return false;
-        }
-    }
-    if (empty($logins)) {
-        addUser();
-        return true;
-    }
+    addUser();
+    addQuestion();
+
 }
 function addUser()
 {
     global $pdo;
-    $userLogin = $_POST['newlogin'];
-    $userPass = $_POST['newpassword'];
-    $addUser = 'INSERT INTO user(login, password) VALUES (:login, :password)';
+    $user_name = $_POST['name'];
+    $user_email = $_POST['email'];
+    $addUser = 'INSERT INTO users (user_name, user_email) VALUES (:login, :email)';
     $stmt = $pdo->prepare($addUser);
-    $stmt->execute(["login" => "$userLogin", "password" => "$userPass"]);
-    $getSession = 'SELECT id FROM user WHERE login = ?';
+    $stmt->execute(["login" => "$user_name", "email" => "$user_email"]);
+    $getSession = 'SELECT id FROM users WHERE user_name = ?';
     $stmt = $pdo->prepare($getSession);
-    $stmt->execute(["$userLogin"]);
-    $newUserSession = $stmt->fetch();
-    $_SESSION['user_id'] = $newUserSession['id'];
-    $_SESSION['user_login'] = $_POST['newlogin'];
+    $stmt->execute(["$user_name"]);
+    $_SESSION['user_name'] = $_POST['name'];
+}
+
+function addQuestion()
+{
+
+    global $pdo;
+    $name = $_SESSION['user_name'];
+    $question = $_POST['question'];
+    $category = $_POST['category'];
+    $addQuestion = 'INSERT INTO questions (category , name, question, is_enabled) VALUES (:category, :user_name, :question, :is_enabled)';
+    $stmt = $pdo->prepare($addQuestion);
+    $stmt->execute(["category" => "$category", "user_name" => "$name", "question" => "$question", "is_enabled" => "0"]);
+
 }
 
 function isAuthorized()
@@ -71,12 +74,16 @@ function isAuthorized()
     }
 }
 
-function addTask ($description) {
+function getAdmins()
+{
+
     global $pdo;
-    global $thetime;
-    $addTask = 'INSERT INTO task (user_id, assigned_user_id, description, date_added) VALUES (:user_id, :assigned_user_id, :description, :date_added)';
-    $stmt = $pdo->prepare($addTask);
-    $stmt->execute(["user_id" => $_SESSION['user_id'], "assigned_user_id" => $_SESSION['user_id'], "description" => $description, "date_added" => $thetime]);
+    $getAdmins = 'SELECT * FROM users WHERE  user_pass is not null';
+    $stmt = $pdo->prepare($getAdmins);
+    $stmt->execute();
+    $tables = $stmt->fetchAll();
+    return $tables;
+
 }
 
 function logout()
@@ -84,14 +91,16 @@ function logout()
     session_destroy();
 }
 
-function deleteTask($user_id, $id) {
+function deleteTask($user_id, $id)
+{
     global $pdo;
     $deleteTask = 'DELETE FROM task WHERE user_id= :user_id AND id= :id LIMIT 1';
     $stmt = $pdo->prepare($deleteTask);
     $stmt->execute(["user_id" => $user_id, "id" => $id]);
 }
 
-function getTasks ($user_id) {
+function getTasks ($user_id)
+{
     global $pdo;
     $getTable = 'SELECT id, description, assigned_user_id, date_added, is_done FROM task WHERE user_id= ? ORDER BY date_added ASC';
     $stmt = $pdo->prepare($getTable);
@@ -101,31 +110,69 @@ function getTasks ($user_id) {
 
 }
 
-function getUpdateTask ($is_done, $user_id, $task_id) {
+function deleteAdmin ($id)
+{
     global $pdo;
-    $setTaskValue = 'UPDATE task SET is_done= :is_done WHERE user_id= :user_id AND id= :task_id LIMIT 1';
-    $stmt = $pdo->prepare($setTaskValue);
-    $stmt->execute(["is_done" => $is_done, "user_id" => $user_id, "task_id" => $task_id]);
+    $deleteAdmin = 'DELETE FROM users WHERE users.id = ?';
+    $stmt = $pdo->prepare($deleteAdmin);
+    $stmt->execute([$id]);
 }
 
-function getUsers() {
+function changePass($new_pass, $id)
+{
     global $pdo;
-    $getUsers = 'SELECT login,id FROM user';
-    $stmt = $pdo->prepare($getUsers);
+    $changePass = 'UPDATE users SET user_pass = :new_pass WHERE users.id = :id';
+    $stmt = $pdo->prepare($changePass);
+    $stmt->execute(["new_pass" => "$new_pass", "id" => $id]);
+
+}
+
+function newAdmin($login, $pass, $email)
+{
+
+    global $pdo;
+    $checkExistedLogin = 'SELECT user_name FROM users WHERE user_name = ?';
+    $stmt = $pdo->prepare($checkExistedLogin);
+    $stmt->execute(["$login"]);
+    $logins = $stmt->fetchAll();
+    foreach ($logins as $login) {
+        if (isset($login)) {
+            return false;
+        }
+    }
+    if (empty($logins)) {
+        $newAdmin = 'INSERT INTO users (user_name, user_pass, user_email) VALUES (:login, :pass, :email)';
+        $stmt = $pdo->prepare($newAdmin);
+        $stmt->execute(["login" => $login, "pass" => $pass, "email" => $email]);
+        return true;
+    }
+
+}
+
+function getCategories()
+{
+    global $pdo;
+    $getCategories = 'SELECT * FROM categories';
+    $stmt = $pdo->prepare($getCategories);
     $stmt->execute();
-    $users = $stmt->fetchAll();
-    return $users;
+    $categories = $stmt->fetchAll();
+    return $categories;
 
 }
 
-function updateAssignedUser($assigned_id, $task_id, $user_id) {
+
+function countQuestionsInCategory()
+{
     global $pdo;
-    $updateAssignedUser = 'UPDATE task SET assigned_user_id= :assigned_id WHERE id= :task_id AND  user_id= :user_id';
-    $stmt = $pdo->prepare($updateAssignedUser);
-    $stmt->execute(["assigned_id" => $assigned_id, "task_id" => $task_id, "user_id" => $user_id]);
+    $countQuestionsInCategory = 'SELECT category as "Категория",COUNT(*) AS "Всего вопросов", SUM(CASE is_enabled WHEN 1 THEN 1 ELSE 0 END) AS "Опубликованных ответов",
+    SUM(CASE is_enabled WHEN 0 THEN 1 ELSE 0 END) AS "Не опубликованных" FROM questions GROUP BY question';
+    $stmt = $pdo->prepare($countQuestionsInCategory);
+    $stmt->execute();
+    $categories = $stmt->fetchAll();
+    return $categories;
 }
-
-function getDeligatedTasks ($user_id) {
+function getDeligatedTasks($user_id)
+{
     global $pdo;
     $getDeligatedTasks = 'SELECT user_id, description, assigned_user_id, login FROM task t INNER JOIN user u ON u.id=t.assigned_user_id WHERE t.assigned_user_id = :user_id AND :user_id not in (SELECT t.user_id FROM task)';
     $stmt = $pdo->prepare($getDeligatedTasks);
@@ -134,7 +181,8 @@ function getDeligatedTasks ($user_id) {
     return $deligates;
 }
 
-function countTask ($user_id) {
+function countTask($user_id)
+{
     global $pdo;
     $nRows = $pdo->query('SELECT count(*) FROM task WHERE user_id = "' . "$user_id" . '"OR assigned_user_id ="' . "$user_id" . '"')->fetchColumn();
     echo $nRows;
