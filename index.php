@@ -1,5 +1,6 @@
 <?php
 require_once 'functions.php';
+$q = 1;
 $errors = [];
 if (!empty($_POST['login']) && !empty($_POST['password'])) {
     if (authorization($_POST['login'], $_POST['password'])) {
