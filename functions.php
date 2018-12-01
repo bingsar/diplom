@@ -165,23 +165,46 @@ function getCategories()
 function countQuestionsInCategory()
 {
     global $pdo;
-    $countQuestionsInCategory = 'SELECT category as "Категория",COUNT(*) AS "Всего вопросов", SUM(CASE is_enabled WHEN 1 THEN 1 ELSE 0 END) AS "Опубликованных ответов",
-    SUM(CASE is_enabled WHEN 0 THEN 1 ELSE 0 END) AS "Не опубликованных" FROM questions GROUP BY question';
+    $countQuestionsInCategory = 'SELECT category as "Категория", COUNT(*) AS "Всего вопросов", SUM(CASE is_enabled WHEN 1 THEN 1 ELSE 0 END) AS "Опубликованных ответов",
+    SUM(CASE is_enabled WHEN 0 THEN 1 ELSE 0 END) AS "Не опубликованных" FROM questions GROUP BY category';
     $stmt = $pdo->prepare($countQuestionsInCategory);
     $stmt->execute();
     $categories = $stmt->fetchAll();
     return $categories;
 }
-function getDeligatedTasks($user_id)
+function getQuestions($category)
 {
     global $pdo;
-    $getDeligatedTasks = 'SELECT user_id, description, assigned_user_id, login FROM task t INNER JOIN user u ON u.id=t.assigned_user_id WHERE t.assigned_user_id = :user_id AND :user_id not in (SELECT t.user_id FROM task)';
-    $stmt = $pdo->prepare($getDeligatedTasks);
-    $stmt->execute(["user_id" => $user_id]);
-    $deligates = $stmt->fetchAll();
-    return $deligates;
+    $getQuestions = 'SELECT question, answer FROM questions WHERE is_enabled = 1 AND category = ?';
+    $stmt = $pdo->prepare($getQuestions);
+    $stmt->execute(["$category"]);
+    $questions = $stmt->fetchAll();
+    return $questions;
 }
 
+function newCategory($category)
+{
+
+    global $pdo;
+    $checkExistedCategory = 'SELECT category FROM categories WHERE category = ?';
+    $stmt = $pdo->prepare($checkExistedCategory);
+    $stmt->execute(["$category"]);
+    $categories = $stmt->fetchAll();
+    foreach ($categories as $categoryList) {
+        if (isset($categoryList['category'])) {
+            return false;
+        }
+
+        foreach ($categories as $categoryInfo) {
+            if (!isset($categoryInfo['category'])) {
+                $newCategory = 'INSERT INTO categories(category) VALUES :category';
+                $stmt = $pdo->prepare($newCategory);
+                $stmt->execute(["category" => $category]);
+                return true;
+            }
+        }
+    }
+}
 function countTask($user_id)
 {
     global $pdo;

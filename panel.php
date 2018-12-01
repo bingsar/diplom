@@ -1,6 +1,7 @@
 <?php
 require_once 'functions.php';
 $errors = [];
+$errorses = [];
 if (!isAuthorized()) {
     header('Location: index.php');
     die;
@@ -19,8 +20,17 @@ if (isset($_POST['admin_login'])){
         header('Location: panel.php');
         die;
     } else {
-            $errors[] = 'Такой логин уже существует';
-        }
+            $errors[] = 'Такой логин уже существует!';
+    }
+}
+
+if (isset($_POST['newCategory'])){
+    if (newCategory($_POST['newCategory'])) {
+        header('Location: panel.php');
+        die;
+    } else {
+        $errorses[] = 'Такая категория уже создана!';
+    }
 }
 
 $time=time();
@@ -73,7 +83,7 @@ if (isset($_POST['task_id']))  {
                                 <td><?php echo $table['id']?><a href="panel.php?id=<?php echo $table['id'];?>"><span class="glyphicon glyphicon-remove" title="Удалить администратора"></span></a>
                                 </td>
                                 <td><?php echo $table['user_name']?></td>
-                                <td><?php echo $table['user_pass']?><form method="POST"><input type="text" name="new_pass"><input type="hidden" name="delete_id" value="<?php echo $table['id']; ?>"><input type="submit" value="Изменить пароль"></form></td>
+                                <td><?php echo $table['user_pass']?><form method="POST"><input type="text" name="new_pass" required><input type="hidden" name="delete_id" value="<?php echo $table['id']; ?>"><input type="submit" value="Изменить пароль"></form></td>
                             </tr>
                         <?php } ?>
                         </tbody>
@@ -126,6 +136,23 @@ if (isset($_POST['task_id']))  {
                     <?php } ?>
                     </tbody>
                 </table>
+
+                    <hr>
+                    <h3>Создать новую категорию</h3>
+                    <form method="POST">
+                        <input type="text" name="newCategory" placeholder="Введите название..." required>
+                        <input type="submit" value="Создать">
+                    </form>
+                    <div>
+                        <br>
+                        <ul>
+                            <?php foreach ($errorses as $errorer): ?>
+                                <li ><?= $errorer; ?></li>
+                            <?php endforeach; ?>
+                        </ul>
+                    </div>
+
+
                     <h3>Делегированные дела для пользователя - <?php echo $_SESSION['user_login']; ?></h3>
                     <table class="table table-bordered table-inverse">
                         <thead>

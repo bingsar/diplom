@@ -128,74 +128,33 @@ if (isset($_POST['name'])) {
                 <?php } ?>
             </ul>
         </div>
+
         <div class="col-md-10 main">
-            <h1>PHP</h1>
+            <?php foreach (getCategories() as $category) { ?>
+            <h1><?= $category['category'] ?></h1>
             <div class="panel-group" id="accordion">
+                <?php foreach (getQuestions($category['category']) as $question) { $q++; ?>
                 <div class="panel panel-default">
                     <div class="panel-heading">
                         <h4 class="panel-title">
-                            <a data-toggle="collapse" data-parent="#accordion" href="#collapseOne">
-                                Ошибка - file_get_contents when url doesn't exist
+                            <a data-toggle="collapse" data-parent="#accordion" href="#<?= $q; ?>">
+                                <?= $question['question']; ?>
                             </a>
                         </h4>
                     </div>
-                    <div id="collapseOne" class="panel-collapse collapse in">
+                    <div id="<?= $q; ?>" class="panel-collapse collapse">
                         <div class="panel-body">
-
-
-                            You need to check the HTTP response code:<br>
-                            <br>
-                            function get_http_response_code($url) {<br>
-                            $headers = get_headers($url);<br>
-                            return substr($headers[0], 9, 3);<br>
-                            }<br>
-                            if(get_http_response_code('http://somenotrealurl.com/notrealpage') != "200"){<br>
-                            echo "error";<br>
-                            }else{<br>
-                            file_get_contents('http://somenotrealurl.com/notrealpage');<br>
-                            }<br>
-
-                            <br>
-
+                            <?= $question['answer']; ?>
                         </div>
                     </div>
                 </div>
-                <div class="panel panel-default">
-                    <div class="panel-heading">
-                        <h4 class="panel-title">
-                            <a data-toggle="collapse" data-parent="#accordion" href="#collapseTwo">
-                                Пункт Группы Свертывания #2
-                            </a>
-                        </h4>
-                    </div>
-                    <div id="collapseTwo" class="panel-collapse collapse">
-                        <div class="panel-body">
-                            Anim pariatur cliche reprehenderit, enim eiusmod high life accusamus terry richardson ad squid. 3 wolf moon officia aute, non cupidatat skateboard dolor brunch. Food truck quinoa nesciunt laborum eiusmod. Brunch 3 wolf moon tempor, sunt aliqua put a bird on it squid single-origin coffee nulla assumenda shoreditch et. Nihil anim keffiyeh helvetica, craft beer labore wes anderson cred nesciunt sapiente ea proident. Ad vegan excepteur butcher vice lomo. Leggings occaecat craft beer farm-to-table, raw denim aesthetic synth nesciunt you probably haven't heard of them accusamus labore sustainable VHS.
-                        </div>
-                    </div>
-                </div>
-                <div class="panel panel-default">
-                    <div class="panel-heading">
-                        <h4 class="panel-title">
-                            <a data-toggle="collapse" data-parent="#accordion" href="#collapseThree">
-                                Пункт Группы Свертывания #3
-                            </a>
-                        </h4>
-                    </div>
-                    <div id="collapseThree" class="panel-collapse collapse">
-                        <div class="panel-body">
-                            Anim pariatur cliche reprehenderit, enim eiusmod high life accusamus terry richardson ad squid. 3 wolf moon officia aute, non cupidatat skateboard dolor brunch. Food truck quinoa nesciunt laborum eiusmod. Brunch 3 wolf moon tempor, sunt aliqua put a bird on it squid single-origin coffee nulla assumenda shoreditch et. Nihil anim keffiyeh helvetica, craft beer labore wes anderson cred nesciunt sapiente ea proident. Ad vegan excepteur butcher vice lomo. Leggings occaecat craft beer farm-to-table, raw denim aesthetic synth nesciunt you probably haven't heard of them accusamus labore sustainable VHS.
-                        </div>
-                    </div>
-                </div>
+                <?php } ?>
             </div>
-
-            </div>
-
+            <?php } ?>
         </div>
     </div>
-
 </div>
+
 
 <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
