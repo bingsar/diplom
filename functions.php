@@ -56,12 +56,13 @@ function addQuestion()
 {
 
     global $pdo;
+    global $thetime;
     $name = $_SESSION['user_name'];
     $question = $_POST['question'];
     $category = $_POST['category'];
-    $addQuestion = 'INSERT INTO questions (category , name, question, is_enabled) VALUES (:category, :user_name, :question, :is_enabled)';
+    $addQuestion = 'INSERT INTO questions (category , name, question, is_enabled, Time) VALUES (:category, :user_name, :question, :is_enabled, :time)';
     $stmt = $pdo->prepare($addQuestion);
-    $stmt->execute(["category" => "$category", "user_name" => "$name", "question" => "$question", "is_enabled" => "0"]);
+    $stmt->execute(["category" => "$category", "user_name" => "$name", "question" => "$question", "is_enabled" => "0", "time" => $thetime]);
 
 }
 
@@ -116,6 +117,16 @@ function deleteAdmin ($id)
     $deleteAdmin = 'DELETE FROM users WHERE users.id = ?';
     $stmt = $pdo->prepare($deleteAdmin);
     $stmt->execute([$id]);
+}
+
+function deleteQuestion($question)
+{
+
+    global $pdo;
+    $deleteQuestion = 'DELETE FROM questions WHERE question = ?';
+    $stmt = $pdo->prepare($deleteQuestion);
+    $stmt->execute([$question]);
+
 }
 
 function changePass($new_pass, $id)
@@ -182,29 +193,65 @@ function getQuestions($category)
     return $questions;
 }
 
-function newCategory($category)
+function getQuestionsInfo($category)
 {
-
     global $pdo;
-    $checkExistedCategory = 'SELECT category FROM categories WHERE category = ?';
-    $stmt = $pdo->prepare($checkExistedCategory);
+    $getQuestionsInfo = 'SELECT question, answer, Time, is_enabled, is_hidden FROM questions WHERE category = ?';
+    $stmt = $pdo->prepare($getQuestionsInfo);
     $stmt->execute(["$category"]);
-    $categories = $stmt->fetchAll();
-    foreach ($categories as $categoryList) {
+    $questions = $stmt->fetchAll();
+    return $questions;
+}
+
+function checkCategory($category)
+{
+    global $pdo;
+    $checkCategory = 'SELECT category FROM categories WHERE category = ?';
+    $stmt = $pdo->prepare($checkCategory);
+    $stmt->execute(["$category"]);
+    $categorieses = $stmt->fetchAll();
+    foreach ($categorieses as $categoryList) {
         if (isset($categoryList['category'])) {
             return false;
-        }
-
-        foreach ($categories as $categoryInfo) {
-            if (!isset($categoryInfo['category'])) {
-                $newCategory = 'INSERT INTO categories(category) VALUES :category';
-                $stmt = $pdo->prepare($newCategory);
-                $stmt->execute(["category" => $category]);
-                return true;
-            }
+        } else {
+            return true;
         }
     }
 }
+
+function newCategory($category)
+{
+    global $pdo;
+    $newCategory = 'INSERT INTO categories(category) VALUES (:category)';
+    $stmt = $pdo->prepare($newCategory);
+    $stmt->execute(["category" => $category]);
+    return true;
+}
+
+function deleteCategory($category)
+{
+    global $pdo;
+    $deleteCategory = 'DELETE FROM categories WHERE category = ?';
+    $stmt = $pdo->prepare($deleteCategory);
+    $stmt->execute(["$category"]);
+}
+
+function questionIsEnabled($id)
+{
+    global $pdo;
+    $questionIsEnabled = 'UPDATE questions SET is_enabled= 1, is_hidden = 0 WHERE question = ?';
+    $stmt = $pdo->prepare($questionIsEnabled);
+    $stmt->execute(["$id"]);
+}
+
+function questionIsHidden($id)
+{
+    global $pdo;
+    $questionIsHidden = 'UPDATE questions SET is_enabled= 0, is_hidden = 1 WHERE question = ?';
+    $stmt = $pdo->prepare($questionIsHidden);
+    $stmt->execute(["$id"]);
+}
+
 function countTask($user_id)
 {
     global $pdo;

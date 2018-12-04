@@ -125,14 +125,14 @@ if (isset($_POST['name'])) {
         <div class="col-md-2 sidebar">
             <ul class="nav nav-sidebar">
                 <?php foreach (getCategories() as $category) { ?>
-                <li><a href=""><?= $category['category'] ?></a></li>
+                <li><a href="#<?= $category['category'] ?>"><?= $category['category'] ?></a></li>
                 <?php } ?>
             </ul>
         </div>
 
         <div class="col-md-10 main">
             <?php foreach (getCategories() as $category) { ?>
-            <h1><?= $category['category'] ?></h1>
+            <h1 id="<?= $category['category'] ?>"><?= $category['category'] ?></h1>
             <div class="panel-group" id="accordion">
                 <?php foreach (getQuestions($category['category']) as $question) { $q++; ?>
                 <div class="panel panel-default">

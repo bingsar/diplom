@@ -11,11 +11,27 @@ if (isset($_GET['id'])) {
     deleteAdmin($_GET['id']);
 }
 
+if (isset($_GET['category'])) {
+    deleteCategory($_GET['category']);
+}
+
+if (isset($_GET['question'])) {
+    deleteQuestion($_GET['question']);
+}
+
+if (isset($_GET['make_enabled_id'])) {
+    questionIsEnabled($_GET['make_enabled_id']);
+}
+
+if (isset($_GET['make_hidden_id'])) {
+    questionIsHidden($_GET['make_hidden_id']);
+}
+
 if (isset($_POST['new_pass'])) {
     changePass($_POST['new_pass'], $_POST['delete_id']);
 }
 
-if (isset($_POST['admin_login'])){
+if (isset($_POST['admin_login'])) {
     if (newAdmin($_POST['admin_login'], $_POST['admin_pass'], $_POST['admin_email'])) {
         header('Location: panel.php');
         die;
@@ -24,8 +40,9 @@ if (isset($_POST['admin_login'])){
     }
 }
 
-if (isset($_POST['newCategory'])){
-    if (newCategory($_POST['newCategory'])) {
+if (isset($_POST['new_category'])) {
+    if (checkCategory($_POST['new_category'])) {
+        newCategory($_POST['new_category']);
         header('Location: panel.php');
         die;
     } else {
@@ -36,11 +53,11 @@ if (isset($_POST['newCategory'])){
 $time=time();
 $thetime = date('d.m.Y', $time);
 
-if (isset($_POST['id']))  {
+if (isset($_POST['id'])) {
     deleteTask($_SESSION['user_id'], $_POST['id']);
 }
 
-if (isset($_POST['task_id']))  {
+if (isset($_POST['task_id'])) {
     updateAssignedUser($_POST['assigned_user_id'], $_POST['task_id'], $_SESSION['user_id']);
 }
 
@@ -80,7 +97,7 @@ if (isset($_POST['task_id']))  {
                         foreach (getAdmins() as $table) {
                             ?>
                             <tr>
-                                <td><?php echo $table['id']?><a href="panel.php?id=<?php echo $table['id'];?>"><span class="glyphicon glyphicon-remove" title="Удалить администратора"></span></a>
+                                <td><?php echo $table['id']?><a href="panel.php?id=<?php echo $table['id'];?>">  <span class="glyphicon glyphicon-remove" title="Удалить администратора"></span></a>
                                 </td>
                                 <td><?php echo $table['user_name']?></td>
                                 <td><?php echo $table['user_pass']?><form method="POST"><input type="text" name="new_pass" required><input type="hidden" name="delete_id" value="<?php echo $table['id']; ?>"><input type="submit" value="Изменить пароль"></form></td>
@@ -140,7 +157,7 @@ if (isset($_POST['task_id']))  {
                     <hr>
                     <h3>Создать новую категорию</h3>
                     <form method="POST">
-                        <input type="text" name="newCategory" placeholder="Введите название..." required>
+                        <input type="text" name="new_category" placeholder="Введите название..." required>
                         <input type="submit" value="Создать">
                     </form>
                     <div>
@@ -151,6 +168,51 @@ if (isset($_POST['task_id']))  {
                             <?php endforeach; ?>
                         </ul>
                     </div>
+
+                    <?php foreach (getCategories() as $category) { $q++; ?>
+                        <div class="panel-group" id="accordion">
+
+                                <div class="panel panel-default">
+                                    <div class="panel-heading">
+
+                                        <h4 class="panel-title">
+
+                                            <a data-toggle="collapse" data-parent="#accordion" href="#<?= $q; ?>">
+                                                <?= $category['category'] ?><span style="padding-left: 100px"><a href="panel.php?category=<?= $category['category'];?>"><span class="glyphicon glyphicon-remove" title="Удалить категорию"></span></a></span>
+                                            </a>
+                                        </h4>
+                                    </div>
+                                    <div id="<?= $q; ?>" class="panel-collapse collapse">
+
+                                        <div class="panel-body">
+
+                                            <table class="table table-bordered table-inverse">
+                                                <thead>
+                                                <tr>
+
+                                                    <th>Вопрос</th>
+                                                    <th>Ответ</th>
+                                                    <th>Дата создания</th>
+                                                    <th>Статус</th>
+
+                                                </tr>
+                                                </thead>
+                                                <tbody>
+                                                <?php foreach (getQuestionsInfo($category['category']) as $question_info) { ?>
+                                                    <tr>
+                                                        <td><?php echo $question_info['question']?><a href="panel.php?question=<?php echo $question_info['question'];?>"><span class="glyphicon glyphicon-remove" title="Удалить вопрос"></span></a></td>
+                                                        <td><?php echo $question_info['answer']?></td>
+                                                        <td><?php echo $question_info['Time']?></td>
+                                                        <td><?php if (($question_info['is_hidden'] == 1)) {echo 'Скрыто'; ?><a href="panel.php?make_enabled_id=<?= $question_info['question'] ?>"> Опубликовать </a> <?php } elseif ($question_info['is_enabled'] == 0) {echo 'Ожидает ответа';} else {echo 'Опубликован'; ?> <a href="panel.php?make_hidden_id=<?= $question_info['question'] ?>"> Скрыть </a> <?php } ?></td>
+                                                    </tr>
+                                                <?php } ?>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                        </div>
+                    <?php } ?>
             </div>
         </div>
     </div>
