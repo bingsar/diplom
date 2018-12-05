@@ -49,7 +49,8 @@ if (isset($_POST['question_change_category_id'])) {
 }
 
 if (isset($_POST['admin_login'])) {
-    if (newAdmin($_POST['admin_login'], $_POST['admin_pass'], $_POST['admin_email'])) {
+    if (checkAdmin($_POST['admin_login'], $_POST['admin_pass'])) {
+        newAdmin($_POST['admin_login'], $_POST['admin_pass'], $_POST['admin_email']);
         header('Location: panel.php');
         die;
     } else {
@@ -68,14 +69,6 @@ if (isset($_POST['new_category'])) {
 
 $time=time();
 $thetime = date('d.m.Y', $time);
-
-if (isset($_POST['id'])) {
-    deleteTask($_SESSION['user_id'], $_POST['id']);
-}
-
-if (isset($_POST['task_id'])) {
-    updateAssignedUser($_POST['assigned_user_id'], $_POST['task_id'], $_SESSION['user_id']);
-}
 
 ?>
 
@@ -209,7 +202,7 @@ if (isset($_POST['task_id'])) {
                                             <table class="table table-bordered table-inverse">
                                                 <thead>
                                                 <tr>
-                                                    <td>Имя автора</td>
+                                                    <th>Имя автора</th>
                                                     <th>Вопрос</th>
                                                     <th>Ответ</th>
                                                     <th>Дата создания</th>

@@ -118,27 +118,28 @@ function changePass($new_pass, $id)
 
 }
 
-function newAdmin($user_login, $pass, $email)
+function checkAdmin($login, $pass)
 {
-
     global $pdo;
     $checkExistedLogin = 'SELECT user_name, user_pass FROM users WHERE user_name = ?';
     $stmt = $pdo->prepare($checkExistedLogin);
-    $stmt->execute(["$user_login"]);
+    $stmt->execute(["$login"]);
     $logins = $stmt->fetchAll();
-    foreach ($logins as $login) {
-        if (isset($login['user_name']) && isset($login['user_pass'])) {
-            return false;
-        }
+
+    if (empty($logins)) {
+        return true;
+    } else {
+        return false;
     }
-    foreach ($logins as $login) {
-        if (!isset($login['user_pass'])) {
-            $newAdmin = 'INSERT INTO users (user_name, user_pass, user_email) VALUES (:login, :pass, :email)';
-            $stmt = $pdo->prepare($newAdmin);
-            $stmt->execute(["login" => $user_login, "pass" => $pass, "email" => $email]);
-            return true;
-        }
-    }
+}
+
+function newAdmin($user_login, $pass, $email)
+{
+    global $pdo;
+    $newCategory = 'INSERT INTO users (user_name, user_pass, user_email) VALUES (:login, :pass, :email)';
+    $stmt = $pdo->prepare($newCategory);
+    $stmt->execute(["login" => $user_login, "pass" => $pass, "email" => $email]);
+    return true;
 }
 
 function getCategories()
@@ -149,7 +150,6 @@ function getCategories()
     $stmt->execute();
     $categories = $stmt->fetchAll();
     return $categories;
-
 }
 
 
@@ -266,16 +266,9 @@ function changeQuestionCategory($newCategory, $id)
 function getQuestionWithoutAnswer()
 {
     global $pdo;
-    $getQuestionOrderBy = 'SELECT category, question, Time FROM questions  WHERE answer IS NULL ORDER BY Time';
+    $getQuestionOrderBy = 'SELECT category, question, Time FROM questions  WHERE answer IS NULL ORDER BY Time DESC';
     $stmt = $pdo->prepare($getQuestionOrderBy);
     $stmt->execute();
     $orderedBy = $stmt->fetchAll();
     return $orderedBy;
-}
-
-function countTask($user_id)
-{
-    global $pdo;
-    $nRows = $pdo->query('SELECT count(*) FROM task WHERE user_id = "' . "$user_id" . '"OR assigned_user_id ="' . "$user_id" . '"')->fetchColumn();
-    echo $nRows;
 }
