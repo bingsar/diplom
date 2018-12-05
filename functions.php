@@ -1,5 +1,4 @@
 <?php
-
 session_start();
 
 $db = 'diplom';
@@ -92,25 +91,6 @@ function logout()
     session_destroy();
 }
 
-function deleteTask($user_id, $id)
-{
-    global $pdo;
-    $deleteTask = 'DELETE FROM task WHERE user_id= :user_id AND id= :id LIMIT 1';
-    $stmt = $pdo->prepare($deleteTask);
-    $stmt->execute(["user_id" => $user_id, "id" => $id]);
-}
-
-function getTasks ($user_id)
-{
-    global $pdo;
-    $getTable = 'SELECT id, description, assigned_user_id, date_added, is_done FROM task WHERE user_id= ? ORDER BY date_added ASC';
-    $stmt = $pdo->prepare($getTable);
-    $stmt->execute([$user_id]);
-    $tables = $stmt->fetchAll();
-    return $tables;
-
-}
-
 function deleteAdmin ($id)
 {
     global $pdo;
@@ -196,7 +176,7 @@ function getQuestions($category)
 function getQuestionsInfo($category)
 {
     global $pdo;
-    $getQuestionsInfo = 'SELECT question, answer, Time, is_enabled, is_hidden FROM questions WHERE category = ?';
+    $getQuestionsInfo = 'SELECT category, name, question, answer, Time, is_enabled, is_hidden FROM questions WHERE category = ?';
     $stmt = $pdo->prepare($getQuestionsInfo);
     $stmt->execute(["$category"]);
     $questions = $stmt->fetchAll();
@@ -210,12 +190,11 @@ function checkCategory($category)
     $stmt = $pdo->prepare($checkCategory);
     $stmt->execute(["$category"]);
     $categorieses = $stmt->fetchAll();
-    foreach ($categorieses as $categoryList) {
-        if (isset($categoryList['category'])) {
-            return false;
-        } else {
-            return true;
-        }
+
+    if (empty($categorieses)) {
+        return true;
+    } else {
+        return false;
     }
 }
 
@@ -236,6 +215,22 @@ function deleteCategory($category)
     $stmt->execute(["$category"]);
 }
 
+function changeName($name, $id)
+{
+    global $pdo;
+    $changeName = 'UPDATE questions SET name = :author WHERE question = :id';
+    $stmt = $pdo->prepare($changeName);
+    $stmt->execute(["author" => $name, "id" => $id]);
+}
+
+function changeQuestion($newQuestion, $id)
+{
+    global $pdo;
+    $changeQuestion = 'UPDATE questions SET question = :question WHERE question = :id';
+    $stmt = $pdo->prepare($changeQuestion);
+    $stmt->execute(["question" => $newQuestion, "id" => $id]);
+}
+
 function questionIsEnabled($id)
 {
     global $pdo;
@@ -250,6 +245,32 @@ function questionIsHidden($id)
     $questionIsHidden = 'UPDATE questions SET is_enabled= 0, is_hidden = 1 WHERE question = ?';
     $stmt = $pdo->prepare($questionIsHidden);
     $stmt->execute(["$id"]);
+}
+
+function editAnswer($answer, $id)
+{
+    global $pdo;
+    $editAnswer = 'UPDATE questions SET answer = :answer, is_enabled= 0, is_hidden = 1  WHERE question = :id';
+    $stmt = $pdo->prepare($editAnswer);
+    $stmt->execute(["answer" => $answer, "id" => $id]);
+}
+
+function changeQuestionCategory($newCategory, $id)
+{
+    global $pdo;
+    $changeQuestionCategory = 'UPDATE questions SET category = :newCategory WHERE question = :id';
+    $stmt = $pdo->prepare($changeQuestionCategory);
+    $stmt->execute(["newCategory" => $newCategory, "id" => $id]);
+}
+
+function getQuestionWithoutAnswer()
+{
+    global $pdo;
+    $getQuestionOrderBy = 'SELECT category, question, Time FROM questions  WHERE answer IS NULL ORDER BY Time';
+    $stmt = $pdo->prepare($getQuestionOrderBy);
+    $stmt->execute();
+    $orderedBy = $stmt->fetchAll();
+    return $orderedBy;
 }
 
 function countTask($user_id)
