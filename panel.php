@@ -77,7 +77,7 @@ $thetime = date('d.m.Y', $time);
 <head>
     <meta charset="UTF-8">
     <link rel="stylesheet" href="css/bootstrap.css">
-    <title>Admin</title>
+    <title>Панель администратора</title>
 </head>
 <body>
 

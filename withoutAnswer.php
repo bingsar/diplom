@@ -21,7 +21,7 @@ if (isset($_POST['new_question_text'])) {
 <head>
     <meta charset="UTF-8">
     <link rel="stylesheet" href="css/bootstrap.css">
-    <title>Document</title>
+    <title>Без ответа</title>
 </head>
 <body>
 
